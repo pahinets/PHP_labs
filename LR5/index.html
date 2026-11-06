@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Форум — AJAX</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="theme.js"></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+
+<div class="container">
+
+    <div class="page-header">
+        <h1>Дошка обговорень</h1>
+        <div class="header-actions">
+            <button type="button" id="theme-toggle" class="btn btn-outline">Темна тема</button>
+        </div>
+    </div>
+
+    <!-- Крок 4. Живий пошук за автором: подія input, без перезавантаження -->
+    <div class="toolbar">
+        <input type="text" id="search" placeholder="Автор" autocomplete="off">
+    </div>
+
+    <!-- Крок 3. Порожній контейнер: таблицю будує script.js із відповіді api_list.php -->
+    <div id="results"></div>
+
+    <div class="summary" id="summary"></div>
+
+    <!-- Крок 6. Форма додавання теми: відправляється через fetch -->
+    <div class="form-wrap">
+        <form id="add-form" novalidate>
+            <div class="field">
+                <label for="title">Назва теми</label>
+                <input type="text" id="title" name="title">
+                <div class="field-error" id="error-title"></div>
+            </div>
+
+            <div class="field">
+                <label for="author">Автор</label>
+                <input type="text" id="author" name="author">
+                <div class="field-error" id="error-author"></div>
+            </div>
+
+            <div class="field field-check">
+                <input type="checkbox" id="is_pinned" name="is_pinned">
+                <label for="is_pinned">Закріпити тему</label>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn" id="submit-btn">Додати тему</button>
+            </div>
+        </form>
+    </div>
+
+    <div class="flash" id="form-status" hidden></div>
+
+</div>
+
+</body>
+</html>
