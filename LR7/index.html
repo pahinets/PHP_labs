@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="uk">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Форум — оптимізація PHP API</title>
+    <link rel="stylesheet" href="style.css">
+    <script src="theme.js"></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+<div class="container">
+    <div class="page-header">
+        <h1>Дошка обговорень</h1>
+        <div class="header-actions">
+            <button type="button" id="theme-toggle" class="btn btn-outline">Темна тема</button>
+        </div>
+    </div>
+    <div class="toolbar">
+        <label for="search">Пошук за автором:</label>
+        <input type="text" id="search" placeholder="Автор" autocomplete="off">
+        <button type="button" id="refresh" class="btn btn-outline">Оновити</button>
+    </div>
+    <div class="toolbar">
+        <input type="checkbox" id="pinned-only">
+        <label for="pinned-only">Лише закріплені (кеш 60 с)</label>
+    </div>
+    <div id="profile" class="summary" role="status" aria-live="polite"></div>
+    <div id="list-status" class="empty" role="status" aria-live="polite">Завантаження…</div>
+    <div id="results" class="table-wrap"></div>
+    <div class="summary" id="summary" aria-live="polite"></div>
+
+    <section class="section" id="topic-details" hidden>
+        <h2>Окрема тема</h2>
+        <div id="topic-content"></div>
+        <button type="button" id="close-details" class="btn btn-outline">Закрити</button>
+    </section>
+
+    <div class="form-wrap">
+        <h2>Додати тему</h2>
+        <form id="add-form" novalidate>
+            <div class="field">
+                <label for="title">Назва теми (5–100 символів)</label>
+                <input type="text" id="title" name="title" aria-describedby="error-title">
+                <div class="field-error" id="error-title"></div>
+            </div>
+            <div class="field">
+                <label for="author">Автор (1–50 символів)</label>
+                <input type="text" id="author" name="author" aria-describedby="error-author">
+                <div class="field-error" id="error-author"></div>
+            </div>
+            <div class="field field-check">
+                <input type="checkbox" id="is_pinned" name="is_pinned" aria-describedby="error-is_pinned">
+                <label for="is_pinned">Закріпити тему</label>
+                <div class="field-error" id="error-is_pinned"></div>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn" id="submit-btn">Додати тему</button>
+            </div>
+        </form>
+    </div>
+    <div class="flash" id="form-status" role="status" aria-live="polite" hidden></div>
+    <section class="section api-info">
+        <h2>Практикум №7 · Варіант 9</h2>
+        <p>Єдина точка входу: <a href="api.php?resource=topics" target="_blank" rel="noopener">api.php?resource=topics</a>.</p>
+        <p>GET — список / одна тема; POST — створення / закріплення.
+            GROUP BY замість N+1; індекс автора; файловий кеш закріплених тем.</p>
+    </section>
+</div>
+</body>
+</html>
