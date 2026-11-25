@@ -1,8 +1,13 @@
 <?php
+require_once dirname(__DIR__) . '/security.php';
+if (!isset($action, $values, $errors, $submitLabel) || !function_exists('h')) {
+    forum_deny(404, 'Ресурс не знайдено.');
+}
 // Спільна HTML-форма для add.php та edit.php
 // Очікує змінні: $action (URL), $values (title, author, is_pinned), $errors, $submitLabel
 ?>
 <form method="post" action="<?= h($action) ?>">
+    <?= forum_csrf_field() ?>
 
     <div class="field">
         <label for="title">Назва теми</label>
@@ -21,7 +26,7 @@
     </div>
 
     <div class="field field-check">
-        <input type="checkbox" id="is_pinned" name="is_pinned" value="1" <?= $values['is_pinned'] ? 'checked' : '' ?>>
+        <input type="checkbox" id="is_pinned" name="is_pinned" value="1" <?= $values['is_pinned'] ? 'checked' : '' ?> <?= forum_is_moderator() ? '' : 'disabled' ?>>
         <label for="is_pinned">Закріпити тему</label>
     </div>
 

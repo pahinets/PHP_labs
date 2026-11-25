@@ -14,6 +14,7 @@ let detailRequest = 0;
 let selectedId = null;
 
 async function requestApi(params = {}, options = {}) {
+    if (options.method === 'POST') options = await ForumSecurity.options(options);
     const query = new URLSearchParams({ resource: 'topics', ...params });
     const response = await fetch('api.php?' + query, options);
     const body = await response.json();

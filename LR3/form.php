@@ -1,6 +1,11 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+require_once dirname(__DIR__) . '/security.php';
+forum_session();
+if (!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'POST'], true)) {
+    header('Allow: GET, POST');
+    forum_deny(405, 'Метод не підтримується.');
+}
+if ($_SERVER['REQUEST_METHOD'] === 'POST') forum_require_csrf($_POST);
 
 // ==========================================================
 // Крок 3. Серверна обробка й валідація (варіант 9 — Форум)
@@ -51,6 +56,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // --- Валідація author: обов'язкове поле ---
     if ($author === '') {
         $errors['author'] = 'Ім\'я автора обов\'язкове';
+    } elseif (strLength($author) > 50) {
+        $errors['author'] = 'Ім\'я автора має містити не більше 50 символів';
     } elseif (!preg_match('/^[\p{L}\s\'\-]+$/u', $author)) {
         $errors['author'] = 'Ім\'я автора може містити лише літери, пробіли, апостроф та дефіс';
     }
@@ -98,6 +105,7 @@ $success = $submitted && empty($errors);
                 виконує JS нижче (ті самі правила, що й у атрибутах та на сервері).
             -->
             <form method="post" action="form.php" id="topicForm" novalidate>
+                <?= forum_csrf_field() ?>
 
                 <div class="field">
                     <label for="title">Назва теми</label>

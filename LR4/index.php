@@ -1,6 +1,7 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+require_once dirname(__DIR__) . '/security.php';
+forum_session();
+$canModerate = forum_is_moderator();
 
 // Крок 3. Підключення до БД і вивід усіх записів (SELECT)
 $pdo = require __DIR__ . '/db.php';
@@ -51,6 +52,7 @@ $flash = is_string($status) ? ($messages[$status] ?? null) : null;
         <div class="header-actions">
             <button type="button" id="theme-toggle" class="btn btn-outline">Темна тема</button>
             <a href="add.php" class="btn btn-outline">+ Нова тема</a>
+            <a href="../moderator.php" class="btn btn-outline">Модератор</a>
         </div>
     </div>
 
@@ -96,13 +98,16 @@ $flash = is_string($status) ? ($messages[$status] ?? null) : null;
                         <?php endif; ?>
                     </td>
                     <td class="actions">
+                        <?php if ($canModerate): ?>
                         <a href="edit.php?id=<?= (int) $topic['id'] ?>">Редагувати</a>
                         <!-- Крок 6. Видалення з підтвердженням через confirm() -->
                         <form method="post" action="delete.php"
-                              onsubmit="return confirm('Видалити тему «<?= h(addslashes($topic['title'])) ?>»?');">
+                              onsubmit="return confirm('Видалити цю тему?');">
+                            <?= forum_csrf_field() ?>
                             <input type="hidden" name="id" value="<?= (int) $topic['id'] ?>">
                             <button type="submit" class="btn btn-danger">Видалити</button>
                         </form>
+                        <?php else: ?>Лише модератор<?php endif; ?>
                     </td>
                 </tr>
             <?php endforeach; ?>

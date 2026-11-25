@@ -1,6 +1,7 @@
 <?php
 // Практикум 6. Єдина точка входу API (варіант 9 — форум).
 declare(strict_types=1);
+require_once dirname(__DIR__) . '/security.php';
 
 header('Content-Type: application/json; charset=utf-8');
 
@@ -148,6 +149,7 @@ function createTopic(PDO $pdo, array $input): void
         ':is_pinned' => $input['is_pinned'],
     ]);
     $id = (int) $pdo->lastInsertId();
+    forum_invalidate_pinned();
     header('Location: api.php?resource=topics&id=' . $id);
     respond(201, ['success' => true, 'data' => findTopic($pdo, $id)]);
 }
@@ -156,6 +158,7 @@ function pinTopic(PDO $pdo, int $id): void
 {
     $stmt = $pdo->prepare('UPDATE topics SET is_pinned = 1 WHERE id = :id');
     $stmt->execute([':id' => $id]);
+    forum_invalidate_pinned();
     // rowCount() може бути 0 для вже закріпленої теми — це не означає 404.
     respond(200, ['success' => true, 'data' => findTopic($pdo, $id)]);
 }
@@ -174,6 +177,8 @@ $q = queryString('q');
 $input = [];
 if ($action === 'pin') {
     allowMethods(['POST']);
+    forum_require_csrf(readInput());
+    forum_require_moderator();
     if ($id === null) {
         fail(400, 'Для закріплення теми потрібен id.');
     }
@@ -182,7 +187,10 @@ if ($action === 'pin') {
 } else {
     allowMethods(['GET', 'POST']);
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $input = validateTopic(readInput());
+        $raw = readInput();
+        forum_require_csrf($raw);
+        $input = validateTopic($raw);
+        if ($input['is_pinned']) forum_require_moderator();
     }
 }
 

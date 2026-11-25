@@ -123,11 +123,11 @@ form.addEventListener('submit', async (event) => {
 
     submitBtn.disabled = true;
     try {
-        const response = await fetch('api_add.php', {
+        const response = await fetch('api_add.php', await ForumSecurity.options({
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(payload),
-        });
+        }));
 
         let data = null;
         try {

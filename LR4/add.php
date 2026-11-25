@@ -1,6 +1,14 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+require_once dirname(__DIR__) . '/security.php';
+forum_session();
+if (!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'POST'], true)) {
+    header('Allow: GET, POST');
+    forum_deny(405, 'Метод не підтримується.');
+}
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    forum_require_csrf($_POST);
+    if (isset($_POST['is_pinned']) && $_POST['is_pinned'] !== '0') forum_require_moderator();
+}
 
 // Крок 4. Додавання запису (INSERT через підготовлений запит)
 $pdo = require __DIR__ . '/db.php';
@@ -21,6 +29,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errors)) {
         $repo->addTopic($values['title'], $values['author'], $values['is_pinned']);
+        forum_invalidate_pinned();
         header('Location: index.php?status=added');
         exit;
     }

@@ -1,4 +1,5 @@
 <?php
+require_once dirname(__DIR__) . '/security.php';
 // Типово та сама БД, що у ЛР4–6. Env дозволяє безпечно тестувати окрему БД.
 return new PDO(
     getenv('PHP_LAB_DSN') ?: 'mysql:host=localhost;dbname=practicum4;charset=utf8mb4',

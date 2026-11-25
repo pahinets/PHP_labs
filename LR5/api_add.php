@@ -1,4 +1,5 @@
 <?php
+require_once dirname(__DIR__) . '/security.php';
 // Крок 5. JSON-ендпоінт додавання теми.
 // Приймає POST: JSON-тіло (php://input) або звичайну форму ($_POST).
 // Успіх — 201 і доданий запис; помилка валідації — 422; інше — 400/405/500.
@@ -28,9 +29,17 @@ if (stripos($contentType, 'application/json') !== false) {
     $input = $_POST;
 }
 
+forum_require_csrf($input);
 $title  = isset($input['title'])  && is_string($input['title'])  ? trim($input['title'])  : '';
 $author = isset($input['author']) && is_string($input['author']) ? trim($input['author']) : '';
-$isPinned = filter_var($input['is_pinned'] ?? false, FILTER_VALIDATE_BOOLEAN);
+$pinnedInput = array_key_exists('is_pinned', $input) ? $input['is_pinned'] : false;
+$isPinned = (is_bool($pinnedInput) || is_int($pinnedInput) || is_string($pinnedInput))
+    ? filter_var($pinnedInput, FILTER_VALIDATE_BOOLEAN, FILTER_NULL_ON_FAILURE) : null;
+if ($isPinned === null) {
+    respond(422, ['error' => 'Перевірте поля форми',
+        'errors' => ['is_pinned' => 'Ознака закріплення має бути логічним значенням']]);
+}
+if ($isPinned) forum_require_moderator();
 
 // Ті самі правила, що й validateTopic() у ПР4
 $errors = [];
@@ -64,6 +73,7 @@ try {
         ':is_pinned' => (int) $isPinned,
     ]);
     $id = (int) $pdo->lastInsertId();
+    forum_invalidate_pinned();
 
     // Повертаємо запис так, як його зберегла БД (зокрема created_at)
     $stmt = $pdo->prepare('SELECT id, title, author, created_at, is_pinned FROM topics WHERE id = :id');
@@ -74,5 +84,6 @@ try {
 
     respond(201, $topic);
 } catch (PDOException $e) {
+    error_log('Practicum05 database: ' . $e->getMessage());
     respond(500, ['error' => 'Помилка бази даних']);
 }

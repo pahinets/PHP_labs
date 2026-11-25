@@ -1,6 +1,7 @@
 <?php
 // Практикум 7. Профілювання, GROUP BY, індекс та кеш (варіант 9 — форум).
 declare(strict_types=1);
+require_once dirname(__DIR__) . '/security.php';
 
 require __DIR__ . '/performance.php';
 header('Content-Type: application/json; charset=utf-8');
@@ -225,6 +226,8 @@ if ($action === 'pinned') {
     }
 } elseif ($action === 'pin') {
     allowMethods(['POST']);
+    forum_require_csrf(readInput());
+    forum_require_moderator();
     if ($id === null) {
         fail(400, 'Для закріплення теми потрібен id.');
     }
@@ -233,7 +236,10 @@ if ($action === 'pinned') {
 } else {
     allowMethods(['GET', 'POST']);
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-        $input = validateTopic(readInput());
+        $raw = readInput();
+        forum_require_csrf($raw);
+        $input = validateTopic($raw);
+        if ($input['is_pinned']) forum_require_moderator();
     }
 }
 

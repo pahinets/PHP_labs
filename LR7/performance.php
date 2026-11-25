@@ -1,5 +1,6 @@
 <?php
 declare(strict_types=1);
+require_once dirname(__DIR__) . '/security.php';
 
 final class Profile
 {
@@ -36,10 +37,7 @@ function profileHeaders(): void
 
 function pinnedCacheFile(): string
 {
-    $dir = getenv('PHP_LAB_CACHE_DIR') ?: sys_get_temp_dir() . '/php-practicum07';
-    $identity = __DIR__ . '|' . (getenv('PHP_LAB_DSN') ?: 'practicum4')
-        . '|' . (getenv('PHP_LAB_DB_USER') ?: 'root');
-    return $dir . '/pinned_' . hash('sha256', $identity) . '.json';
+    return forum_pinned_cache_file();
 }
 
 function openPinnedCache()

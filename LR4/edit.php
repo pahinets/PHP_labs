@@ -1,6 +1,12 @@
 <?php
-error_reporting(E_ALL);
-ini_set('display_errors', 1);
+require_once dirname(__DIR__) . '/security.php';
+forum_session();
+if (!in_array($_SERVER['REQUEST_METHOD'], ['GET', 'POST'], true)) {
+    header('Allow: GET, POST');
+    forum_deny(405, 'Метод не підтримується.');
+}
+if ($_SERVER['REQUEST_METHOD'] === 'POST') forum_require_csrf($_POST);
+forum_require_moderator();
 
 // Крок 5. Редагування запису (SELECT для заповнення форми + UPDATE)
 $pdo = require __DIR__ . '/db.php';
@@ -11,7 +17,7 @@ $repo = new TopicRepository($pdo);
 
 // id з адресного рядка перевіряємо як ціле число
 $id = filter_input(INPUT_GET, 'id', FILTER_VALIDATE_INT);
-$topic = $id ? $repo->findById($id) : null;
+$topic = $id && $id > 0 ? $repo->findById($id) : null;
 
 if ($topic === null) {
     header('Location: index.php?status=missing');
@@ -34,6 +40,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     if (empty($errors)) {
         $repo->updateTopic($id, $values['title'], $values['author'], $values['is_pinned']);
+        forum_invalidate_pinned();
         header('Location: index.php?status=updated');
         exit;
     }
